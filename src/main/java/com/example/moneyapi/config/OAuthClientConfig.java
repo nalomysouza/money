@@ -17,13 +17,13 @@ import static java.util.Arrays.asList;
 
 @Configuration
 @EnableOAuth2Client
-public class OpenIdConnectConfig {
+public class OAuthClientConfig {
 
 	@Autowired
 	private DiscoveryDocument discoveryDocument;
 
 	@Bean
-	public OAuth2ProtectedResourceDetails protectedResourceDetails() {
+	public OAuth2ProtectedResourceDetails oauthClientResourceDetails() {
 		AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
 
 		details.setClientId(discoveryDocument.getClientId());
@@ -31,21 +31,25 @@ public class OpenIdConnectConfig {
 		details.setAccessTokenUri(discoveryDocument.getAccessTokenUri());
 		details.setUserAuthorizationUri(discoveryDocument.getUserAuthorizationUri());
 		details.setPreEstablishedRedirectUri(discoveryDocument.getRedirectUri());
-		details.setScope(asList("openid", "email", "public_profile"));
+		details.setScope(asList("openid", "public_profile", "email"));
 		details.setUseCurrentUri(false);
 		return details;
 	}
 
+	/**
+	 * obter os tokens de autenticação e de acesso
+	 * 
+	 * @param clientContext
+	 * @return
+	 */
 	@Bean
-	public OAuth2RestTemplate loginCidadaoOpenIdRestTemplate(OAuth2ClientContext clientContext) {
-		OAuth2RestTemplate template = new OAuth2RestTemplate(protectedResourceDetails(), clientContext);
-
-		template.setAccessTokenProvider(getAccessTokenProvider());
-
+	public OAuth2RestTemplate oauthClientRestTemplate(OAuth2ClientContext clientContext) {
+		OAuth2RestTemplate template = new OAuth2RestTemplate(oauthClientResourceDetails(), clientContext);
+		template.setAccessTokenProvider(createAccessTokenProvider());
 		return template;
 	}
 
-	private AccessTokenProviderChain getAccessTokenProvider() {
+	private AccessTokenProviderChain createAccessTokenProvider() {
 		AccessTokenProviderChain provider = new AccessTokenProviderChain(
 				Arrays.asList(new AuthorizationCodeAccessTokenProvider()));
 		return provider;

@@ -57,8 +57,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	private final RequestMatcher matcherLocal;
 
 	public OpenIdConnectFilter(String defaultFilterProcessesUrl, String callback) {
-		super(new OrRequestMatcher(new AntPathRequestMatcher(defaultFilterProcessesUrl),
-				new AntPathRequestMatcher(callback)));
+		super(new OrRequestMatcher(new AntPathRequestMatcher(defaultFilterProcessesUrl), new AntPathRequestMatcher(callback)));
 		this.matcherLocal = new AntPathRequestMatcher(defaultFilterProcessesUrl);
 		setAuthenticationManager(new NoopAuthenticationManager());
 	}
@@ -70,8 +69,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	}
 
 	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-			throws IOException, ServletException {
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 
 		if (matcherLocal.matches(request)) {
@@ -83,8 +81,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	}
 
 	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
+	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
 		OAuth2AccessToken accessToken;
 
@@ -104,8 +101,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 			Usuario usuario = repositorioDeUsuarios
 					.buscarUsuarioAutenticado(new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier())).get();
 
-			UsuarioAutenticado usuarioAutenticado = new UsuarioAutenticado(usuario.getAutenticacaoOpenid(),
-					accessToken);
+			UsuarioAutenticado usuarioAutenticado = new UsuarioAutenticado(usuario.getAutenticacaoOpenid(), accessToken);
 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(usuarioAutenticado, null,
 					usuarioAutenticado.getAuthorities());
@@ -114,8 +110,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 			return authentication;
 
 		} catch (InvalidTokenException e) {
-			BadCredentialsException erro = new BadCredentialsException("Não foi possível obter os detalhes do token",
-					e);
+			BadCredentialsException erro = new BadCredentialsException("Não foi possível obter os detalhes do token", e);
 			publish(new OAuth2AuthenticationFailureEvent(erro));
 			throw erro;
 		}

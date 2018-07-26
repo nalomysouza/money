@@ -15,12 +15,18 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * salvar os dados de identificação do usuário assim que o mesmo for autenticado
+ * 
+ * @author nalomysouza
+ *
+ */
 @Service
 @Transactional
 public class OpenIdTokenServices {
 
 	@Autowired
-	private UsuarioRepository repositorioDeUsuarios;
+	private UsuarioRepository usuarioRepository;
 
 	@Autowired
 	private ObjectMapper jsonMapper;
@@ -29,13 +35,16 @@ public class OpenIdTokenServices {
 	private UserInfoService userInfoService;
 
 	public void saveAccessToken(OAuth2AccessToken accessToken) {
+		// acessando o endpoint userInfo do provedor
+		Map<String, String> userInfo = userInfoService.getUserInfoFor(accessToken);
+
 		TokenIdClaims tokenIdClaims = TokenIdClaims.extrairClaims(jsonMapper, accessToken);
 
-		Optional<Usuario> usuarioAutenticado = repositorioDeUsuarios
+		Optional<Usuario> usuarioAutenticado = usuarioRepository
 				.buscarUsuarioAutenticado(new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier()));
 
 		Usuario usuario = usuarioAutenticado.orElseGet(() -> {
-			Usuario novoUsuario = new Usuario(tokenIdClaims.getEmail(), tokenIdClaims.getEmail());
+			Usuario novoUsuario = new Usuario(userInfo.get("full_name"), userInfo.get("email"));
 
 			new AutenticacaoOpenid(novoUsuario, new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier()),
 					tokenIdClaims.getIssuerIdentifier(), obterDatetime(tokenIdClaims.getExpirationTime()));
@@ -49,13 +58,12 @@ public class OpenIdTokenServices {
 			autenticacaoOpenid.setValidade(obterDatetime(tokenIdClaims.getExpirationTime()));
 		}
 
-		// acessando o endpoint userinfo para obter o nome do usuário
-		Map<String, String> userInfo = userInfoService.getUserInfoFor(accessToken);
+		// acessando o endpoint userInfo
 		String nomeDoUsuario = userInfo.get("name");
 
 		usuario.alterarNome(nomeDoUsuario);
 
-		repositorioDeUsuarios.registrar(usuario);
+		usuarioRepository.registrar(usuario);
 
 	}
 

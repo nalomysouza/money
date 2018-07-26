@@ -10,12 +10,13 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import java.io.IOException;
 
+/**
+ * claims que vamos obter a partir do id_token
+ * 
+ * @author nalomysouza
+ *
+ */
 public class TokenIdClaims {
-
-	@Getter
-	@Setter
-	@JsonProperty("azp")
-	private String authorizedParty;
 
 	@Getter
 	@Setter
@@ -26,16 +27,6 @@ public class TokenIdClaims {
 	@Setter
 	@JsonProperty("sub")
 	private String subjectIdentifier;
-
-	@Getter
-	@Setter
-	@JsonProperty("email")
-	private String email;
-
-	@Getter
-	@Setter
-	@JsonProperty("at_hash")
-	private String accessTokenHashValue;
 
 	@Getter
 	@Setter
@@ -51,6 +42,11 @@ public class TokenIdClaims {
 	@Setter
 	@JsonProperty("exp")
 	private long expirationTime;
+
+	@Getter
+	@Setter
+	@JsonProperty("auth_time")
+	private long authorizationTime;
 
 	public static TokenIdClaims extrairClaims(ObjectMapper jsonMapper, OAuth2AccessToken accessToken) {
 		String idToken = accessToken.getAdditionalInformation().get("id_token").toString();

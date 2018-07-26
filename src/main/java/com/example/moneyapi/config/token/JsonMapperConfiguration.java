@@ -1,4 +1,4 @@
-package com.example.moneyapi.config;
+package com.example.moneyapi.config.token;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
