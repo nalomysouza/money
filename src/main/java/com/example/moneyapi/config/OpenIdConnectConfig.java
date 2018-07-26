@@ -32,7 +32,7 @@ public class OpenIdConnectConfig {
 		details.setUserAuthorizationUri(discoveryDocument.getUserAuthorizationUri());
 		details.setPreEstablishedRedirectUri(discoveryDocument.getRedirectUri());
 		details.setScope(asList("openid", "email", "public_profile"));
-		details.setUseCurrentUri(true);
+		details.setUseCurrentUri(false);
 		return details;
 	}
 

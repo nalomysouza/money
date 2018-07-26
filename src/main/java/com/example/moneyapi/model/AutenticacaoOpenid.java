@@ -1,4 +1,4 @@
-package com.example.moneyapi;
+package com.example.moneyapi.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,9 +9,6 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
-
-import com.example.moneyapi.model.IdentificadorAutorizacao;
-import com.example.moneyapi.model.Usuario;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -55,9 +52,7 @@ public class AutenticacaoOpenid implements Serializable {
 
 	public boolean expirou() {
 		OffsetDateTime dataDeValidadeDoToken = OffsetDateTime.ofInstant(validade.toInstant(), ZoneId.systemDefault());
-
 		OffsetDateTime agora = OffsetDateTime.now(ZoneId.systemDefault());
-
 		return agora.isAfter(dataDeValidadeDoToken);
 	}
 }

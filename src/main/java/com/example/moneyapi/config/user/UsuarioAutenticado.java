@@ -10,7 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import com.example.moneyapi.AutenticacaoOpenid;
+import com.example.moneyapi.model.AutenticacaoOpenid;
 
 public class UsuarioAutenticado implements UserDetails {
 	private static final long serialVersionUID = 1L;

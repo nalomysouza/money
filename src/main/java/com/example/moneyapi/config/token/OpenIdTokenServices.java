@@ -1,7 +1,7 @@
 package com.example.moneyapi.config.token;
 
-import com.example.moneyapi.AutenticacaoOpenid;
 import com.example.moneyapi.config.user.UserInfoService;
+import com.example.moneyapi.model.AutenticacaoOpenid;
 import com.example.moneyapi.model.IdentificadorAutorizacao;
 import com.example.moneyapi.model.Usuario;
 import com.example.moneyapi.repository.UsuarioRepository;

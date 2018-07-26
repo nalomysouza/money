@@ -10,8 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
-import com.example.moneyapi.AutenticacaoOpenid;
-
 import lombok.Getter;
 
 @Entity
@@ -21,7 +19,7 @@ public class Usuario implements Serializable {
 	@Getter
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", updatable = false, nullable = false)
+	@Column(updatable = false, nullable = false)
 	private Integer id;
 
 	@Getter
