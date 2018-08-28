@@ -33,15 +33,14 @@ public class OpenIdTokenServices {
 
 	@Autowired
 	private UserInfoService userInfoService;
-
+	//TODO: Melhorar esse metodo para salvar mais informações no banco de dados
 	public void saveAccessToken(OAuth2AccessToken accessToken) {
 		// acessando o endpoint userInfo do provedor
 		Map<String, String> userInfo = userInfoService.getUserInfoFor(accessToken);
 
 		TokenIdClaims tokenIdClaims = TokenIdClaims.extrairClaims(jsonMapper, accessToken);
 
-		Optional<Usuario> usuarioAutenticado = usuarioRepository
-				.buscarUsuarioAutenticado(new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier()));
+		Optional<Usuario> usuarioAutenticado = usuarioRepository.buscarUsuarioAutenticado(new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier()));
 
 		Usuario usuario = usuarioAutenticado.orElseGet(() -> {
 			Usuario novoUsuario = new Usuario(userInfo.get("full_name"), userInfo.get("email"));

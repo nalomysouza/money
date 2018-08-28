@@ -34,7 +34,7 @@ public class UserInfoService {
 			return result.getBody();
 		}
 
-		throw new RuntimeException("Não foi possível obter os dados do usuário");
+		throw new RuntimeException("Não foi possível obter os dados do usuário (User-Info)");
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

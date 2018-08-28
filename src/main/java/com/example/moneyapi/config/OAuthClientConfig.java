@@ -45,13 +45,11 @@ public class OAuthClientConfig {
 	@Bean
 	public OAuth2RestTemplate oauthClientRestTemplate(OAuth2ClientContext clientContext) {
 		OAuth2RestTemplate template = new OAuth2RestTemplate(oauthClientResourceDetails(), clientContext);
-		template.setAccessTokenProvider(createAccessTokenProvider());
+		template.setAccessTokenProvider(getAccessTokenProvider());
 		return template;
 	}
 
-	private AccessTokenProviderChain createAccessTokenProvider() {
-		AccessTokenProviderChain provider = new AccessTokenProviderChain(
-				Arrays.asList(new AuthorizationCodeAccessTokenProvider()));
-		return provider;
+	private AccessTokenProviderChain getAccessTokenProvider() {
+		return new AccessTokenProviderChain(Arrays.asList(new AuthorizationCodeAccessTokenProvider()));
 	}
 }

@@ -51,7 +51,6 @@ public class TokenIdClaims {
 	public static TokenIdClaims extrairClaims(ObjectMapper jsonMapper, OAuth2AccessToken accessToken) {
 		String idToken = accessToken.getAdditionalInformation().get("id_token").toString();
 		Jwt tokenDecoded = JwtHelper.decode(idToken);
-
 		try {
 			return jsonMapper.readValue(tokenDecoded.getClaims(), TokenIdClaims.class);
 		} catch (IOException e) {

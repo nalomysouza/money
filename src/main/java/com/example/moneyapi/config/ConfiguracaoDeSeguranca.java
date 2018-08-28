@@ -28,7 +28,7 @@ public class ConfiguracaoDeSeguranca extends WebSecurityConfigurerAdapter {
 	private ObjectMapper jsonMapper;
 
 	@Autowired
-	private UsuarioRepository repositorioDeUsuarios;
+	private UsuarioRepository usuarioRepository;
 
 	@Autowired
 	private OpenIdTokenServices tokenServices;
@@ -36,31 +36,31 @@ public class ConfiguracaoDeSeguranca extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private OAuth2ProtectedResourceDetails resourceDetails;
 
-	@Bean
-	public OpenIdConnectFilter openIdConnectFilter() {
-		OpenIdConnectFilter filter = new OpenIdConnectFilter("/categorias/**", "/oauth/callback");
-
-		filter.setRestTemplate(openidRestTemplate);
-		filter.setJsonMapper(jsonMapper);
-		filter.setRepositorioDeUsuarios(repositorioDeUsuarios);
-		filter.setTokenServices(tokenServices);
-		filter.setResourceDetails(resourceDetails);
-		return filter;
-	}
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		String[] caminhosPermitidos = new String[] { "/", "/pessoas", "/usuarios", "/oauth/callback", "/webjars/**",
-				"/static/**", "/jquery*" };
+		String[] caminhosPermitidos = new String[] { "/", "/pessoas", "/oauth/callback", "/webjars/**", "/static/**",
+				"/jquery*" };
 
-		http.addFilterAfter(filtroParaClientOAuth2(), AbstractPreAuthenticatedProcessingFilter.class)
+		http.addFilterAfter(clientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
 				.addFilterAfter(openIdConnectFilter(), OAuth2ClientContextFilter.class).httpBasic()
 				.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/oauth/callback")).and()
 				.authorizeRequests().antMatchers(caminhosPermitidos).permitAll().anyRequest().authenticated().and()
 				.logout().logoutSuccessUrl("/").permitAll().and().csrf().disable();
 	}
 
-	private OAuth2ClientContextFilter filtroParaClientOAuth2() {
+	@Bean
+	public OpenIdConnectFilter openIdConnectFilter() {
+		OpenIdConnectFilter filter = new OpenIdConnectFilter("/categorias/**", "/oauth/callback");
+
+		filter.setRestTemplate(openidRestTemplate);
+		filter.setJsonMapper(jsonMapper);
+		filter.setUsuarioRepository(usuarioRepository);
+		filter.setTokenServices(tokenServices);
+		filter.setResourceDetails(resourceDetails);
+		return filter;
+	}
+
+	private OAuth2ClientContextFilter clientContextFilter() {
 		return new OAuth2ClientContextFilter();
 	}
 

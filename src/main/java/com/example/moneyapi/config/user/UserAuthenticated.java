@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import com.example.moneyapi.model.AutenticacaoOpenid;
 
-public class UsuarioAutenticado implements UserDetails {
+public class UserAuthenticated implements UserDetails {
 	private static final long serialVersionUID = 1L;
 
 	@Getter
@@ -21,7 +21,7 @@ public class UsuarioAutenticado implements UserDetails {
 	@Getter
 	private AutenticacaoOpenid autenticacaoOpenId;
 
-	public UsuarioAutenticado(AutenticacaoOpenid autenticacaoOpenid, OAuth2AccessToken token) {
+	public UserAuthenticated(AutenticacaoOpenid autenticacaoOpenid, OAuth2AccessToken token) {
 		this.token = token;
 		this.autenticacaoOpenId = autenticacaoOpenid;
 	}

@@ -2,7 +2,7 @@ package com.example.moneyapi.config.filter;
 
 import com.example.moneyapi.config.token.OpenIdTokenServices;
 import com.example.moneyapi.config.token.TokenIdClaims;
-import com.example.moneyapi.config.user.UsuarioAutenticado;
+import com.example.moneyapi.config.user.UserAuthenticated;
 import com.example.moneyapi.model.IdentificadorAutorizacao;
 import com.example.moneyapi.model.Usuario;
 import com.example.moneyapi.repository.UsuarioRepository;
@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter {
+	private ApplicationEventPublisher eventPublisher;
+	private final RequestMatcher matcherLocal;
 
 	@Setter
 	private OAuth2RestTemplate restTemplate;
@@ -44,7 +46,7 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	private ObjectMapper jsonMapper;
 
 	@Setter
-	private UsuarioRepository repositorioDeUsuarios;
+	private UsuarioRepository usuarioRepository;
 
 	@Setter
 	private OpenIdTokenServices tokenServices;
@@ -52,24 +54,16 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	@Setter
 	private OAuth2ProtectedResourceDetails resourceDetails;
 
-	private ApplicationEventPublisher eventPublisher;
-
-	private final RequestMatcher matcherLocal;
-
 	public OpenIdConnectFilter(String defaultFilterProcessesUrl, String callback) {
-		super(new OrRequestMatcher(new AntPathRequestMatcher(defaultFilterProcessesUrl), new AntPathRequestMatcher(callback)));
+		super(new OrRequestMatcher(new AntPathRequestMatcher(defaultFilterProcessesUrl),
+				new AntPathRequestMatcher(callback)));
 		this.matcherLocal = new AntPathRequestMatcher(defaultFilterProcessesUrl);
 		setAuthenticationManager(new NoopAuthenticationManager());
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
-		this.eventPublisher = eventPublisher;
-		super.setApplicationEventPublisher(eventPublisher);
-	}
-
-	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 
 		if (matcherLocal.matches(request)) {
@@ -81,14 +75,14 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 	}
 
 	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+			throws AuthenticationException, IOException, ServletException {
 
 		OAuth2AccessToken accessToken;
 
 		try {
 			accessToken = restTemplate.getAccessToken();
 			tokenServices.saveAccessToken(accessToken);
-
 		} catch (OAuth2Exception e) {
 			BadCredentialsException erro = new BadCredentialsException("Não foi possível obter o token", e);
 			publish(new OAuth2AuthenticationFailureEvent(erro));
@@ -98,10 +92,10 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 		try {
 			TokenIdClaims tokenIdClaims = TokenIdClaims.extrairClaims(jsonMapper, accessToken);
 
-			Usuario usuario = repositorioDeUsuarios
+			Usuario usuario = usuarioRepository
 					.buscarUsuarioAutenticado(new IdentificadorAutorizacao(tokenIdClaims.getSubjectIdentifier())).get();
 
-			UsuarioAutenticado usuarioAutenticado = new UsuarioAutenticado(usuario.getAutenticacaoOpenid(), accessToken);
+			UserAuthenticated usuarioAutenticado = new UserAuthenticated(usuario.getAutenticacaoOpenid(), accessToken);
 
 			Authentication authentication = new UsernamePasswordAuthenticationToken(usuarioAutenticado, null,
 					usuarioAutenticado.getAuthorities());
@@ -110,25 +104,31 @@ public class OpenIdConnectFilter extends AbstractAuthenticationProcessingFilter 
 			return authentication;
 
 		} catch (InvalidTokenException e) {
-			BadCredentialsException erro = new BadCredentialsException("Não foi possível obter os detalhes do token", e);
+			BadCredentialsException erro = new BadCredentialsException("Não foi possível obter informações do token",
+					e);
 			publish(new OAuth2AuthenticationFailureEvent(erro));
 			throw erro;
 		}
+	}
+
+	private static class NoopAuthenticationManager implements AuthenticationManager {
+		@Override
+		public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+			throw new UnsupportedOperationException("No authentication should be done with this AuthenticationManager");
+		}
+
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher eventPublisher) {
+		this.eventPublisher = eventPublisher;
+		super.setApplicationEventPublisher(eventPublisher);
 	}
 
 	private void publish(ApplicationEvent event) {
 		if (eventPublisher != null) {
 			eventPublisher.publishEvent(event);
 		}
-	}
-
-	private static class NoopAuthenticationManager implements AuthenticationManager {
-
-		@Override
-		public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-			throw new UnsupportedOperationException("No authentication should be done with this AuthenticationManager");
-		}
-
 	}
 
 }
